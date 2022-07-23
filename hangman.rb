@@ -2,6 +2,7 @@
 
 # words are read as one more character than they actually are
 # eg. 'find' is 5 letters
+# because '\n' is appended to the end of the word when reading it
 
 # Computer that recieves the guess of the player and outputs information
 class Computer
@@ -17,33 +18,15 @@ class Computer
 
   def check_guess(guess)
     # optional: check if the character has already been chosen?
+
+    puts
     if @chosen_word.include?(guess)
-
-      i = 0
-      @chosen_word.each_char do |c|
-        @current_guess[i] = guess if guess == c
-        i += 1
-      end
-
-      puts
-      if @chosen_word.strip == @current_guess.compact.join
-        puts 'Congrats! You got the word!'
-        puts "It was #{@chosen_word.strip}!"
-        @player_guesses = 0
-      else
-        display_guess_info
-      end
+      update_correct_guesses(guess)
+      @chosen_word.strip == @current_guess.compact.join ? win_game : display_guess_info
     else
-      @incorrect_guesses.push(guess)
-      @player_guesses -= 1
-      @player_guesses = 0 if guess == 'exit'
-      if @player_guesses.zero?
-        puts 'Game over. '
-        puts "The word was \"#{@chosen_word.strip}\"."
-      else
-        puts
-        display_guess_info
-      end
+      update_incorrect_guesses(guess)
+      update_player_guesses(guess)
+      @player_guesses.zero? ? lose_game : display_guess_info
     end
   end
 
@@ -51,6 +34,41 @@ class Computer
 
   # TODO: print the correct one if you lose, for some reason underscores are not working
   # check if they already put it so player can't just infinitely spam the same letter that they already put
+
+  def update_correct_guesses(guess)
+    i = 0
+    @chosen_word.each_char do |c|
+      @current_guess[i] = guess if guess == c
+      i += 1
+    end
+  end
+
+  def update_incorrect_guesses(guess)
+    @incorrect_guesses.push(guess)
+  end
+
+  def update_player_guesses(guess)
+    @player_guesses -= 1
+    @player_guesses = 0 if guess == 'exit'
+  end
+
+  def win_game
+    puts 'Congrats! You got the word!'
+    puts "It was \"#{@chosen_word.strip}\"!"
+    @player_guesses = 0
+  end
+
+  def lose_game
+    puts 'Game over. '
+    puts "The word was \"#{@chosen_word.strip}\"."
+  end
+
+  def display_guess_info
+    puts @player_guesses == 1 ? 'Oh no! You have 1 guess left!' : "You have #{@player_guesses} guesses left!"
+    display_letters
+    puts "Incorrect guesses: #{@incorrect_guesses.join(', ')}"
+    puts
+  end
 
   def display_letters
     @current_guess.each do |c|
@@ -62,21 +80,14 @@ class Computer
       print ' '
     end
   end
-
-  def display_guess_info
-    puts @player_guesses == 1 ? 'Oh no! You have 1 guess left!' : "You have #{@player_guesses} guesses left!"
-    display_letters
-    puts "Incorrect guesses: #{@incorrect_guesses.join(', ')}"
-    puts
-  end
 end
 
 # The player that plays Hangman
 class Player
   def guess
     # check input validity (1 character). also should be case insensitive.
-    player_guess = gets.chomp.to_s
-    player_guess
+    # var name player_guess
+    gets.chomp.to_s
   end
 end
 
