@@ -16,15 +16,8 @@ class Computer
   end
 
   def check_guess(guess)
-    
     # optional: check if the character has already been chosen?
-    # if the player is right, update the @player_guess array
-    # otherwise, add it to the array of incorrect guesses
     if @chosen_word.include?(guess)
-      # there's definitely an easier way to do this
-      # for each character in chosen word, if it's the guess char,
-      # set the player guess at that index to the guess
-      # ok idk why this took me such a long time
 
       i = 0
       @chosen_word.each_char do |c|
@@ -33,13 +26,20 @@ class Computer
       end
 
       puts
-      display_guess_info
+      if @chosen_word.strip == @current_guess.compact.join
+        puts 'Congrats! You got the word!'
+        puts "It was #{@chosen_word.strip}!"
+        @player_guesses = 0
+      else
+        display_guess_info
+      end
     else
       @incorrect_guesses.push(guess)
       @player_guesses -= 1
+      @player_guesses = 0 if guess == 'exit'
       if @player_guesses.zero?
         puts 'Game over. '
-        puts "The word was #{@chosen_word}."
+        puts "The word was \"#{@chosen_word.strip}\"."
       else
         puts
         display_guess_info
@@ -54,9 +54,7 @@ class Computer
 
   def display_letters
     @current_guess.each do |c|
-      # pp c
       if c.nil?
-        # print "wait why isn't this working"
         print '-'
       else
         print c
@@ -67,9 +65,7 @@ class Computer
 
   def display_guess_info
     puts @player_guesses == 1 ? 'Oh no! You have 1 guess left!' : "You have #{@player_guesses} guesses left!"
-    # display the correct letters and position
     display_letters
-    # output the incorrect letter that have already been chosen
     puts "Incorrect guesses: #{@incorrect_guesses.join(', ')}"
     puts
   end
@@ -77,22 +73,16 @@ end
 
 # The player that plays Hangman
 class Player
-
   def guess
-    player_guess_info
     # check input validity (1 character). also should be case insensitive.
     player_guess = gets.chomp.to_s
     player_guess
-  end
-
-  private
-
-  def player_guess_info
-    
   end
 end
 
 computer = Computer.new
 player = Player.new
+
+puts 'Try to guess characters in the word. Type exit to give up.'
 
 computer.check_guess(player.guess) until computer.player_guesses.zero?
